@@ -110,8 +110,6 @@ class OpenposeExtractor:
                                 figure_path = os.path.join(frame_folder, str(count) + '.png')
                                 cv2.imwrite(figure_path, frame)
                                 self.db.insert_figure(figure_path, 0)
-                    if count % 100 == 0:
-                        break
 
                     out.write(frame)
                     cv2.waitKey(10)
@@ -145,7 +143,6 @@ class OpenposeExtractor:
 
                     self.extract(path, output_path, frame_folder)
                     self.db.insert_video(path, output_path, frame_folder)
-                    return
 
 if __name__ == '__main__':
     argc = len(sys.argv)
