@@ -2,6 +2,7 @@
 *.png
 *.mp4
 *.zip
+*.7z
 models/
 
 
