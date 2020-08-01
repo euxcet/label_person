@@ -12,7 +12,6 @@ from database import Mongo
 class OpenposeExtractor:
     def __init__(self):
         self.db = Mongo()
-        self.db.clear()
         # Custom Params (refer to include/openpose/flags.hpp for more parameters)
         params = dict()
         params["model_folder"] = "models/"
