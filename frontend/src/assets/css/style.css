@@ -1,0 +1,118 @@
+.highlight {
+    color: red;
+}
+
+.relative {
+    position: relative;
+}
+
+.button-row {
+    margin-top: 15px;
+}
+
+.cross {
+    z-index: -1;
+    position: absolute;
+}
+
+.record-title {
+    font-size: 30px;
+}
+
+.record-message {
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+.record-remain {
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+.record-row {
+    width: 100%;
+    height: 70px;
+    margin-top: 40px;
+}
+
+.main {
+    margin-top: 50px;
+}
+.login-form-container {
+    margin-top: 30px;
+    width: 60%;
+    margin-left: 20%;
+    height: 200px;
+}
+
+.login-form-row {
+    width: 100%;
+    height: 70px;
+}
+
+.login-form-input {
+    width: 30%;
+    float: left;
+}
+
+.login-form-label {
+    margin-left: 31%;
+    width: 8%;
+    margin-top: 9px;
+    float: left;
+}
+
+.login-number {
+    width: 30%;
+    float: left;
+}
+
+.login-radio {
+    width: 10%;
+    float: left;
+    margin-top: 13px;
+}
+
+.form-input {
+    width: 80%;
+    float: left;
+}
+
+.form-button {
+    float: left;
+    height: 40px;
+}
+
+.form-checkbox {
+    margin-top: 20px;
+    float: left;
+    width: 100%;
+}
+
+.form-checkbox-group {
+    margin-top: 20px;
+    float: left;
+    width: 100%;
+}
+
+.form-checkbox-in {
+    width: 18%;
+    margin: 0;
+    text-align: left;
+}
+
+.form-window {
+    margin-top: 20px;
+    float: left;
+    width: 100%;
+}
+
+.form-window label {
+    margin-right: 20px;
+}
+
+.result-container {
+    width: 90%;
+    margin-left: 5%;
+    margin-top: 60px;
+}
