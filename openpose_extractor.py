@@ -61,10 +61,6 @@ class OpenposeExtractor:
         return minRec, maxRec
 
 
-
-
-    # Add others in path?
-
     def extract(self, video_path, output_path, frame_folder):
         capture = cv2.VideoCapture(video_path)
         if not capture.isOpened():
