@@ -20,6 +20,7 @@ score_col = db['score']
 
 path_dict = dict()
 prev_dict = dict()
+next_dict = dict()
 
 def generate_id():
 	return ''.join(random.sample('zyxwvutsrqponmlkjihgfedcba', 10))
@@ -54,6 +55,8 @@ def get_image():
 @app.route('/next', methods = ['POST'])
 def get_next():
 	fid = request.json['id']
+	if fid in next_dict:
+		return jsonify({'id': next_dict[fid]})
 	figure = get_figure()
 	if figure is None:
 		return jsonify({})
@@ -61,6 +64,7 @@ def get_next():
 	new_id = generate_id()
 	path_dict[new_id] = figure['path']
 	prev_dict[new_id] = fid
+	next_dict[fid] = new_id
 
 	return jsonify({'id': new_id})
 
