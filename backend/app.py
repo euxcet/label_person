@@ -14,7 +14,7 @@ CORS(app, supports_credentials=True)
 client = pymongo.MongoClient('mongodb://localhost:27017/')
 db = client['face']
 figure_meta = db['figure']
-#  path times
+#  path face times
 score_col = db['score']
 # id path score 0 error 1 up 2 down 3 left 4 right
 
