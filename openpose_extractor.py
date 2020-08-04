@@ -12,6 +12,7 @@ from database import Mongo
 class OpenposeExtractor:
     def __init__(self):
         self.db = Mongo()
+        self.db.clear()
         # Custom Params (refer to include/openpose/flags.hpp for more parameters)
         params = dict()
         params["model_folder"] = "models/"
@@ -61,7 +62,7 @@ class OpenposeExtractor:
         return minRec, maxRec
 
 
-    def extract(self, video_path, output_path, frame_folder):
+    def extract(self, video_path, output_path, frame_folder, face_folder):
         capture = cv2.VideoCapture(video_path)
         if not capture.isOpened():
             print("Failed to load video", video_path)
@@ -82,6 +83,7 @@ class OpenposeExtractor:
         print("video path:", video_path)
         print("output path:", output_path)
         print("frame folder:", frame_folder)
+        print("face folder:", face_folder)
         print("fps:", fps)
         print("frame count:", frame_count)
         print("width:", frame_width)
@@ -101,11 +103,15 @@ class OpenposeExtractor:
                         minRec, maxRec = self.getFaceRectangle(datum.poseKeypoints)
                         face = frame[minRec[0]:maxRec[0], minRec[1]:maxRec[1]]
                         if maxRec[0] != 0 and maxRec[1] != 0:
-                            cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
                             if count % 10 == 0:
                                 figure_path = os.path.join(frame_folder, str(count) + '.png')
+                                face_path = os.path.join(face_folder, str(count) + '.png')
+                                cv2.imwrite(face_path, frame[minRec[1]:maxRec[1] + 1, minRec[0]:maxRec[0] + 1])
+                                cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
                                 cv2.imwrite(figure_path, frame)
-                                self.db.insert_figure(figure_path, 0)
+                                self.db.insert_figure(figure_path, face_path, 0)
+                            else:
+                                cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
 
                     out.write(frame)
                     cv2.waitKey(10)
@@ -128,17 +134,20 @@ class OpenposeExtractor:
                     folder = os.path.join(save_home, os.path.splitext(f)[0])
                     video_folder = os.path.join(folder, 'video')
                     frame_folder = os.path.join(folder, 'frame')
+                    face_folder = os.path.join(folder, 'face')
                     makedirs(folder)
                     makedirs(video_folder)
                     makedirs(frame_folder)
+                    makedirs(face_folder)
                     output_path = os.path.join(video_folder, 'video.avi')
 
                     path = os.path.join(os.getcwd(), path)
                     output_path = os.path.join(os.getcwd(), output_path)
                     frame_folder = os.path.join(os.getcwd(), frame_folder)
+                    face_folder = os.path.join(os.getcwd(), face_folder)
 
-                    self.extract(path, output_path, frame_folder)
-                    self.db.insert_video(path, output_path, frame_folder)
+                    self.extract(path, output_path, frame_folder, face_folder)
+                    self.db.insert_video(path, output_path, frame_folder, face_folder)
 
 if __name__ == '__main__':
     argc = len(sys.argv)
