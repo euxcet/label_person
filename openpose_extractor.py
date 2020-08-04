@@ -109,7 +109,7 @@ class OpenposeExtractor:
                                 cv2.imwrite(face_path, frame[minRec[1]:maxRec[1] + 1, minRec[0]:maxRec[0] + 1])
                                 cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
                                 cv2.imwrite(figure_path, frame)
-                                self.db.insert_figure(figure_path, face_path, 0, (minRec[0] + maxRec[0]) // 2, (minRec[1] + maxRec[1]) // 2)
+                                self.db.insert_figure(figure_path, face_path, 0, frame_width, frame_height, (minRec[0] + maxRec[0]) // 2, (minRec[1] + maxRec[1]) // 2)
                             else:
                                 cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
 
