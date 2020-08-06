@@ -3,6 +3,9 @@
 *.mp4
 *.zip
 *.7z
+*.jpg
+*.jpeg
+*.bmp
 models/
 
 

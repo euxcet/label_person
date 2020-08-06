@@ -24,7 +24,7 @@ class OpenposeExtractor:
 
 
 
-    def getFaceRectangle(self, pose):
+    def getFaceRectangle(self, pose, height, width):
         minRec = (10000, 10000)
         maxRec = (0, 0)
         nose = pose[0][0]
@@ -58,6 +58,10 @@ class OpenposeExtractor:
         maxRec = maxPoint(maxRec, LShoulder)
         maxRec = maxPoint(maxRec, RShoulderSym)
         maxRec = maxPoint(maxRec, LShoulderSym)
+
+        dlt = ((maxRec[0] - minRec[0]) / 4, (maxRec[1] - minRec[1]) / 4)
+        minRec = (max(int(minRec[0] - dlt[0]), 0), max(int(minRec[1] - dlt[1]), 0))
+        maxRec = (min(int(maxRec[0] + dlt[0]), width - 1), min(int(maxRec[1] + dlt[1]), height - 1))
 
         return minRec, maxRec
 
@@ -100,7 +104,7 @@ class OpenposeExtractor:
                     datum.cvInputData = frame
                     self.opWrapper.emplaceAndPop([datum])
                     if datum.poseKeypoints.shape != ():
-                        minRec, maxRec = self.getFaceRectangle(datum.poseKeypoints)
+                        minRec, maxRec = self.getFaceRectangle(datum.poseKeypoints, frame.shape[0], frame.shape[1])
                         face = frame[minRec[0]:maxRec[0], minRec[1]:maxRec[1]]
                         if maxRec[0] != 0 and maxRec[1] != 0:
                             if count % 10 == 0:
