@@ -14,6 +14,10 @@ from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets
 from torchvision import transforms
+from trochvision import models
+
+import matplotlib.pyplot as plt
+from PIL import Image
 
 def make_weights_for_balanced_classes(images, nclasses):
     count = [0] * nclasses
@@ -116,17 +120,20 @@ if __name__ == '__main__':
     batch_size = 2
     transform = {
         'train': transforms.Compose([
-            transforms.RandomResizedCrop(224),
+            transforms.Resize((224, 224)),
+            #transforms.RandomResizedCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[.485, .456, .406], std=[.229, .224, .225])
         ]),
         'val': transforms.Compose([
-            transforms.RandomResizedCrop(224),
+            transforms.Resize((224, 224)),
+            #transforms.RandomResizedCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[.485, .456, .406], std=[.229, .224, .225])
         ]),
         'test': transforms.Compose([
-            transforms.RandomResizedCrop(224),
+            transforms.Resize((224, 224)),
+            #transforms.RandomResizedCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[.485, .456, .406], std=[.229, .224, .225])
         ])
@@ -136,6 +143,8 @@ if __name__ == '__main__':
     }
     weights = make_weights_for_balanced_classes(dataset['train'].imgs, len(dataset['train'].classes))
     weights = torch.DoubleTensor(weights)
+    print(weights)
+    exit(0)
     sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
     dataloader = {
         'train': DataLoader(dataset['train'], batch_size=batch_size, sampler=sampler),
@@ -150,6 +159,7 @@ if __name__ == '__main__':
     if use_gpu:
         model.cuda()
     
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(),lr = 0.005, momentum=0.9)
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5,gamma=0.2)

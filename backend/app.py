@@ -82,5 +82,16 @@ def update_score():
 	update(fid, score)
 	return jsonify({})
 
+@app.route('/meta', methods = ['POST'])
+def meta():
+	all_cnt = figure_meta.find({}).count()
+	min_cnt = 0
+	min_val = 0
+	for x in figure_meta.find().sort('times').limit(1):
+		min_val = x['times']
+		min_cnt = figure_meta.find({'times': x['times']}).count()
+
+	return jsonify({'all_cnt': all_cnt, 'min_cnt': min_cnt, 'min_val': min_val})
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')

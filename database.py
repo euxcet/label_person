@@ -14,8 +14,8 @@ class Mongo:
             return x
         return None
 
-    def insert_video(self, video_path, output_path, frame_folder, face_folder):
-        self.video_meta.insert_one({'video_path': video_path, 'output_path': output_path, 'frame_folder': frame_folder})
+    def insert_video(self, video_path, output_path, frame_folder, face_folder, body_folder):
+        self.video_meta.insert_one({'video_path': video_path, 'output_path': output_path, 'frame_folder': frame_folder, 'body_folder': body_folder})
 
     def insert_figure(self, figure_path, face_path, times, frame_width, frame_height, x, y):
         self.figure_meta.insert_one({'path': figure_path, 'face': face_path, 'width': frame_width, 'height': frame_height, 'times': times, 'x': x, 'y': y})
@@ -23,4 +23,3 @@ class Mongo:
     def clear(self):
         print(self.video_meta.delete_many({}).deleted_count)
         print(self.figure_meta.delete_many({}).deleted_count)
-        print(self.score_col.delete_many({}).deleted_count)

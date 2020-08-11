@@ -46,26 +46,31 @@ def pack_face(save_folder):
         makedirs(folder[x]['up_folder'])
         makedirs(folder[x]['down_folder'])
 
-    score = dict()
+    score_dict = dict()
 
     score_cnt = 0
 
     for x in score_col.find():
         score_cnt += 1
         face = None
+        p = 0.0
 
         for y in figure_meta.find({'path': x['path']}):
             face = y['face']
+            p = float(y['x']) / float(y['width'])
+
+        if p < 0.4 or p > 0.5:
+            continue
 
         if face is not None:
-            if face not in score:
+            if face not in score_dict:
                 value = [0, 0, 0, 0, 0]
                 value[x['score']] = 1
-                score[face] = value
+                score_dict[face] = value
             else:
-                score[face][x['score']] += 1
+                score_dict[face][x['score']] += 1
 
-    for (key, value) in score.items():
+    for (key, value) in score_dict.items():
         score = argmax(value)
         new_filename = key.split('\\')[-3] + '_' + key.split('\\')[-1]
         rand_v = random.randint(0, 9)
@@ -86,6 +91,7 @@ def pack_face(save_folder):
             
 
     print('Label times:', score_cnt)
+    print('Valid figures:', len(score_dict))
 
 
 if __name__ == '__main__':

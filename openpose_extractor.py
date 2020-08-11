@@ -23,6 +23,19 @@ class OpenposeExtractor:
         self.opWrapper.start()
 
 
+    def getBodyRectangle(self, pose, height, width):
+        minRec = (10000, 10000)
+        maxRec = (0, 0)
+        for x in pose[0]:
+            minRec = minPoint(minRec, x)
+            maxRec = maxPoint(maxRec, x)
+
+        if maxRec[0] > 0 and maxRec[1] > 0:
+            dlt = ((maxRec[0] - minRec[0]) / 5, (maxRec[1] - minRec[1]) / 4)
+            minRec = (max(int(minRec[0] - dlt[0]), 0), max(int(minRec[1] - dlt[1]), 0))
+            maxRec = (min(int(maxRec[0] + dlt[0]), width - 1), maxRec[1])
+        
+        return minRec, maxRec
 
     def getFaceRectangle(self, pose, height, width):
         minRec = (10000, 10000)
@@ -59,14 +72,15 @@ class OpenposeExtractor:
         maxRec = maxPoint(maxRec, RShoulderSym)
         maxRec = maxPoint(maxRec, LShoulderSym)
 
-        dlt = ((maxRec[0] - minRec[0]) / 4, (maxRec[1] - minRec[1]) / 4)
-        minRec = (max(int(minRec[0] - dlt[0]), 0), max(int(minRec[1] - dlt[1]), 0))
-        maxRec = (min(int(maxRec[0] + dlt[0]), width - 1), min(int(maxRec[1] + dlt[1]), height - 1))
+        if maxRec[0] > 0 and maxRec[1] > 0:
+            dlt = ((maxRec[0] - minRec[0]) / 4, (maxRec[1] - minRec[1]) / 4)
+            minRec = (max(int(minRec[0] - dlt[0]), 0), max(int(minRec[1] - dlt[1]), 0))
+            maxRec = (min(int(maxRec[0] + dlt[0]), width - 1), min(int(maxRec[1] + dlt[1]), height - 1))
 
         return minRec, maxRec
 
 
-    def extract(self, video_path, output_path, frame_folder, face_folder):
+    def extract(self, video_path, output_path, frame_folder, face_folder, body_folder):
         capture = cv2.VideoCapture(video_path)
         if not capture.isOpened():
             print("Failed to load video", video_path)
@@ -88,6 +102,7 @@ class OpenposeExtractor:
         print("output path:", output_path)
         print("frame folder:", frame_folder)
         print("face folder:", face_folder)
+        print("body folder:", body_folder)
         print("fps:", fps)
         print("frame count:", frame_count)
         print("width:", frame_width)
@@ -104,18 +119,25 @@ class OpenposeExtractor:
                     datum.cvInputData = frame
                     self.opWrapper.emplaceAndPop([datum])
                     if datum.poseKeypoints.shape != ():
-                        minRec, maxRec = self.getFaceRectangle(datum.poseKeypoints, frame.shape[0], frame.shape[1])
-                        face = frame[minRec[0]:maxRec[0], minRec[1]:maxRec[1]]
-                        if maxRec[0] != 0 and maxRec[1] != 0:
+                        if count % 10 == 0:
+                            bodyMinRec, bodyMaxRec = self.getBodyRectangle(datum.poseKeypoints, frame.shape[0], frame.shape[1])
+                            if bodyMaxRec[0] != 0 and bodyMaxRec[1] != 0:
+                                body_path = os.path.join(body_folder, str(count) + '.png')
+                                cv2.imwrite(body_path, frame[bodyMinRec[1]:bodyMaxRec[1] + 1, bodyMinRec[0]:bodyMaxRec[0] + 1])
+
+
+                        faceMinRec, faceMaxRec = self.getFaceRectangle(datum.poseKeypoints, frame.shape[0], frame.shape[1])
+                        if faceMaxRec[0] != 0 and faceMaxRec[1] != 0:
                             if count % 10 == 0:
                                 figure_path = os.path.join(frame_folder, str(count) + '.png')
                                 face_path = os.path.join(face_folder, str(count) + '.png')
-                                cv2.imwrite(face_path, frame[minRec[1]:maxRec[1] + 1, minRec[0]:maxRec[0] + 1])
-                                cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
+                                cv2.imwrite(face_path, frame[faceMinRec[1]:faceMaxRec[1] + 1, faceMinRec[0]:faceMaxRec[0] + 1])
+                                cv2.rectangle(frame, faceMinRec, faceMaxRec, (0, 255, 0), 2)
                                 cv2.imwrite(figure_path, frame)
-                                self.db.insert_figure(figure_path, face_path, 0, frame_width, frame_height, (minRec[0] + maxRec[0]) // 2, (minRec[1] + maxRec[1]) // 2)
+                                self.db.insert_figure(figure_path, face_path, 0, frame_width, frame_height, (faceMinRec[0] + faceMaxRec[0]) // 2, (faceMinRec[1] + faceMaxRec[1]) // 2)
                             else:
-                                cv2.rectangle(frame, minRec, maxRec, (0, 255, 0), 2)
+                                cv2.rectangle(frame, faceMinRec, faceMaxRec, (0, 255, 0), 2)
+
 
                     out.write(frame)
                     cv2.waitKey(10)
@@ -139,19 +161,24 @@ class OpenposeExtractor:
                     video_folder = os.path.join(folder, 'video')
                     frame_folder = os.path.join(folder, 'frame')
                     face_folder = os.path.join(folder, 'face')
+                    body_folder = os.path.join(folder, 'body')
+
                     makedirs(folder)
                     makedirs(video_folder)
                     makedirs(frame_folder)
                     makedirs(face_folder)
+                    makedirs(body_folder)
+
                     output_path = os.path.join(video_folder, 'video.avi')
 
                     path = os.path.join(os.getcwd(), path)
                     output_path = os.path.join(os.getcwd(), output_path)
                     frame_folder = os.path.join(os.getcwd(), frame_folder)
                     face_folder = os.path.join(os.getcwd(), face_folder)
+                    body_folder = os.path.join(os.getcwd(), body_folder)
 
-                    self.extract(path, output_path, frame_folder, face_folder)
-                    self.db.insert_video(path, output_path, frame_folder, face_folder)
+                    self.extract(path, output_path, frame_folder, face_folder, body_folder)
+                    self.db.insert_video(path, output_path, frame_folder, face_folder, body_folder)
 
 if __name__ == '__main__':
     argc = len(sys.argv)
