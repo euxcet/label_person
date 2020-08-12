@@ -10,9 +10,10 @@ from database import Mongo
 
 
 class OpenposeExtractor:
-    def __init__(self):
+    def __init__(self, ifclear):
         self.db = Mongo()
-        self.db.clear()
+        if ifclear:
+            self.db.clear()
         # Custom Params (refer to include/openpose/flags.hpp for more parameters)
         params = dict()
         params["model_folder"] = "models/"
@@ -182,10 +183,8 @@ class OpenposeExtractor:
 
 if __name__ == '__main__':
     argc = len(sys.argv)
-    if argc != 3:
+    if argc != 3 and argc != 4:
         print('usage: python openpose_extractor.py [source folder] [output folder]')
     else:
-        for i in sys.argv:
-            print(i)
-        extractor = OpenposeExtractor()
+        extractor = OpenposeExtractor(argc == 4)
         extractor.extractFolder(sys.argv[1], sys.argv[2])
